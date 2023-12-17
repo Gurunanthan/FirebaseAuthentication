@@ -45,7 +45,7 @@ const Auth = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <form style={styles.form}>
       <h2>Authentication</h2>
       {currentUser ? (
         <div>
@@ -55,35 +55,42 @@ const Auth = () => {
           </button>
         </div>
       ) : (
-        <div>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
-          <button style={styles.button} onClick={handleSignIn}>
+        <fieldset>
+          <legend>Sign In</legend>
+          <label>
+            Email:
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={styles.input}
+            />
+          </label>
+          <label>
+            Password:
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={styles.input}
+            />
+          </label>
+          <button type="button" style={styles.button} onClick={handleSignIn}>
             Sign In
           </button>
-          <button style={styles.button} onClick={handleGoogleSignIn}>
+          <button type="button" style={styles.button} onClick={handleGoogleSignIn}>
             Sign In With Google
           </button>
-        </div>
+        </fieldset>
       )}
-    </div>
+    </form>
   );
 };
 
 const styles = {
-  container: {
+  form: {
     maxWidth: '400px',
     margin: 'auto',
     padding: '20px',
