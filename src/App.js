@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithPopup,
@@ -7,20 +7,33 @@ import {
 } from 'firebase/auth';
 import { auth, gooleAuth } from './firebase.utils.js';
 
-const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
+class Auth extends Component {
+  constructor(props) {
+    super(props);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+    this.state = {
+      email: '',
+      password: '',
+      currentUser: null,
+      loading: false,
+    };
+  }
+
+  componentDidMount() {
+    this.unsubscribe = onAuthStateChanged(auth, (user) => {
+      this.setState({ currentUser: user, loading: false });
     });
+  }
 
-    return () => unsubscribe();
-  }, []);
+  componentWillUnmount() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+  }
 
-  const handleSignIn = async () => {
+  handleSignIn = async () => {
+    this.setState({ loading: true });
+    const { email, password } = this.state;
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
@@ -28,7 +41,8 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  handleGoogleSignIn = async () => {
+    this.setState({ loading: true });
     try {
       await signInWithPopup(auth, gooleAuth);
     } catch (err) {
@@ -36,7 +50,8 @@ const Auth = () => {
     }
   };
 
-  const handleSignOut = async () => {
+  handleSignOut = async () => {
+    this.setState({ loading: true });
     try {
       await signOut(auth);
     } catch (err) {
@@ -44,50 +59,70 @@ const Auth = () => {
     }
   };
 
-  return (
-    <form style={styles.form}>
-      <h2>Authentication</h2>
-      {currentUser ? (
-        <div>
-          <p>Welcome, {currentUser.email}!</p>
-          <button style={styles.button} onClick={handleSignOut}>
-            Log Out
-          </button>
-        </div>
-      ) : (
-        <fieldset>
-          <legend>Sign In</legend>
-          <label>
-            Email:
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-            />
-          </label>
-          <label>
-            Password:
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={styles.input}
-            />
-          </label>
-          <button type="button" style={styles.button} onClick={handleSignIn}>
-            Sign In
-          </button>
-          <button type="button" style={styles.button} onClick={handleGoogleSignIn}>
-            Sign In With Google
-          </button>
-        </fieldset>
-      )}
-    </form>
-  );
-};
+  render() {
+    const { email, password, currentUser, loading } = this.state;
+
+    return (
+      <form style={styles.form}>
+        <h2>Authentication</h2>
+        {loading && <div style={styles.loading}>Loading...</div>}
+        {currentUser ? (
+          <div>
+            {currentUser.photoURL && (
+              <img
+                src={currentUser.photoURL}
+                alt="User Profile"
+                style={styles.profileImage}
+              />
+            )}
+            <p>Welcome, {currentUser.email}!</p>
+            <button style={styles.button} onClick={this.handleSignOut}>
+              Log Out
+            </button>
+          </div>
+        ) : (
+          <fieldset>
+            <legend>Sign In</legend>
+            <label>
+              Email:
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => this.setState({ email: e.target.value })}
+                style={styles.input}
+              />
+            </label>
+            <label>
+              Password:
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => this.setState({ password: e.target.value })}
+                style={styles.input}
+              />
+            </label>
+            <button
+              type="button"
+              style={styles.button}
+              onClick={this.handleSignIn}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              style={styles.button}
+              onClick={this.handleGoogleSignIn}
+            >
+              Sign In With Google
+            </button>
+          </fieldset>
+        )}
+      </form>
+    );
+  }
+}
 
 const styles = {
   form: {
@@ -112,6 +147,15 @@ const styles = {
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+  },
+  loading: {
+    margin: '10px 0',
+  },
+  profileImage: {
+    width: '50px',
+    height: '50px',
+    borderRadius: '50%',
+    marginBottom: '10px',
   },
 };
 
