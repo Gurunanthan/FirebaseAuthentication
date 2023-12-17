@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import { auth, gooleAuth } from "./firebase.utils.js";
 import "./Auth.Styles.css";
+import Display from "../Display/Display.Component.jsx";
 
 class Auth extends Component {
   constructor(props) {
@@ -76,19 +77,7 @@ class Auth extends Component {
         <h2>Authentication</h2>
         {loading && <div className="loading">Loading...</div>}
         {currentUser ? (
-          <div>
-            {currentUser.photoURL && (
-              <img
-                src={currentUser.photoURL}
-                alt="User Profile"
-                className="profileImage"
-              />
-            )}
-            <p>Welcome, {currentUser.displayName || currentUser.email}!</p>
-            <button className="button" onClick={this.handleSignOut}>
-              Log Out
-            </button>
-          </div>
+          <Display currentUser={currentUser} handleSignOut={this.handleSignOut}/>
         ) : (
           <fieldset>
             <legend>Sign In</legend>
