@@ -1,21 +1,23 @@
-import React, { Component } from 'react';
-
+// Auth.js
+import React, { Component } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-} from 'firebase/auth';
-import { auth, gooleAuth } from './firebase.utils.js';
-import './Auth.Styles.css';
+  updateProfile,
+} from "firebase/auth";
+import { auth, gooleAuth } from "./firebase.utils.js";
+import "./Auth.Styles.css";
 
 class Auth extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
+      username: "",
       currentUser: null,
       loading: false,
     };
@@ -35,9 +37,14 @@ class Auth extends Component {
 
   handleSignIn = async () => {
     this.setState({ loading: true });
-    const { email, password } = this.state;
+    const { email, password, username } = this.state;
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(userCredential.user, { displayName: username });
     } catch (err) {
       console.error(err);
     }
@@ -62,7 +69,7 @@ class Auth extends Component {
   };
 
   render() {
-    const { email, password, currentUser, loading } = this.state;
+    const { email, password, username, currentUser, loading } = this.state;
 
     return (
       <form className="form">
@@ -77,7 +84,7 @@ class Auth extends Component {
                 className="profileImage"
               />
             )}
-            <p>Welcome, {currentUser.email}!</p>
+            <p>Welcome, {currentUser.displayName || currentUser.email}!</p>
             <button className="button" onClick={this.handleSignOut}>
               Log Out
             </button>
@@ -102,6 +109,16 @@ class Auth extends Component {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => this.setState({ password: e.target.value })}
+                className="input"
+              />
+            </label>
+            <label>
+              Username:
+              <input
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => this.setState({ username: e.target.value })}
                 className="input"
               />
             </label>
